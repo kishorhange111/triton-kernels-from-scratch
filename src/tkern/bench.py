@@ -149,10 +149,6 @@ def main(argv=None):
     print("\n".join(report))
 
 
-if __name__ == "__main__":
-    main()
-
-
 def diagnose(n: int = 4096, b: int = 4, h: int = 16, d: int = 64) -> str:
     """Why is attention slow on this GPU? Check for tensor-core MMA in the PTX, then sweep
     launch parameters for the forward kernel."""
@@ -185,3 +181,7 @@ def diagnose(n: int = 4096, b: int = 4, h: int = 16, d: int = 64) -> str:
         ms = _ms(lambda: F.scaled_dot_product_attention(q, k, v))
     lines.append(f"\ntorch SDPA reference: {_attn_flops(b, h, n, d, False, 'fwd') / ms / 1e9:.2f}")
     return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    main()
