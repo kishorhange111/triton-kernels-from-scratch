@@ -51,6 +51,29 @@ bandwidth: every cached byte is read once. The kernel uses multiply-and-reduce r
 that pages no sequence owns are never read. `python -m tkern.bench --paged` reports
 effective GB/s against SDPA on a contiguous cache, with and without split-K.
 
+**On a T4** ([`results/paged_Tesla_T4.md`](results/paged_Tesla_T4.md); fp16, 32 query /
+8 KV heads, d = 128, 16-token pages; GB/s = K and V bytes read / time, peak ≈ 320):
+
+| batch × context | paged, split-K (auto) | paged, 1 split | SDPA, contiguous cache |
+|---|---|---|---|
+| 32 × 1,024 | 57 | 73 | 89 |
+| 8 × 4,096 | 96 | 93 | 92 |
+| 8 × 16,384 | 62 | 83 | 87 |
+| 1 × 32,768 | **97** | 48 | 66 |
+
+- **Split-K pays off where it is meant to.** With one long sequence, one program per
+  (sequence, head) occupies 32 programs on 40 SMs. Splitting the pages doubles bandwidth
+  (48 → 97 GB/s) and beats SDPA on a contiguous cache by 1.5×, despite the block-table
+  indirection.
+- **It hurts when the batch already fills the GPU.** At 32 × 1,024 and 8 × 16,384 the
+  automatic split count adds programs and a combine pass that aren't needed. A single
+  split is faster there, so the heuristic should consider the work per program, not only
+  the SM count.
+- **Paging costs little.** With a single split, the paged kernel is within 10–20% of
+  SDPA's contiguous reads, and level at 8 × 4,096. Every configuration stays at or below 30%
+  of HBM peak. As in the attention diagnosis above, this kernel runs on CUDA-core FMAs on
+  sm75; it does not saturate memory.
+
 ## Correctness
 
 ```
