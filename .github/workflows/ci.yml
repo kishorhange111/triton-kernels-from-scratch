@@ -26,6 +26,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: pip install triton pytest
+      - run: pip install triton pytest numpy  # the interpreter executes kernels with NumPy
       - run: pip install -e . --no-deps
       - run: pytest -q
