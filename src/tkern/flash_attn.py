@@ -176,16 +176,21 @@ def _check(q: torch.Tensor, k: torch.Tensor, v: torch.Tensor) -> None:
 
 class _FlashAttention(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, q, k, v, causal, sm_scale, block_m, block_n):
+    def forward(ctx, q, k, v, causal, sm_scale, block_m, block_n, launch):
         _check(q, k, v)
         q, k, v = q.contiguous(), k.contiguous(), v.contiguous()
         B, H, N, D = q.shape
         o = torch.empty_like(q)
         lse = torch.empty((B * H, N), device=q.device, dtype=torch.float32)
         grid = (triton.cdiv(N, block_m), B * H)
-        _fwd[grid](q, k, v, o, lse, sm_scale * LOG2E, N, D, block_m, block_n, causal)
+        _fwd[grid](q, k, v, o, lse, sm_scale * LOG2E, N, D, block_m, block_n, causal, **launch)
         ctx.save_for_backward(q, k, v, o, lse)
-        ctx.causal, ctx.sm_scale, ctx.blocks = causal, sm_scale, (block_m, block_n)
+        ctx.causal, ctx.sm_scale, ctx.blocks, ctx.launch = (
+            causal,
+            sm_scale,
+            (block_m, block_n),
+            launch,
+        )
         return o
 
     @staticmethod
@@ -199,12 +204,27 @@ class _FlashAttention(torch.autograd.Function):
         dq, dk, dv = torch.empty_like(q), torch.empty_like(k), torch.empty_like(v)
         qk = ctx.sm_scale * LOG2E
         _bwd_dkdv[(triton.cdiv(N, bn), B * H)](
-            q, k, v, do, lse, delta, dk, dv, ctx.sm_scale, qk, N, D, bm, bn, ctx.causal
+            q,
+            k,
+            v,
+            do,
+            lse,
+            delta,
+            dk,
+            dv,
+            ctx.sm_scale,
+            qk,
+            N,
+            D,
+            bm,
+            bn,
+            ctx.causal,
+            **ctx.launch,
         )
         _bwd_dq[(triton.cdiv(N, bm), B * H)](
-            q, k, v, do, lse, delta, dq, ctx.sm_scale, qk, N, D, bm, bn, ctx.causal
+            q, k, v, do, lse, delta, dq, ctx.sm_scale, qk, N, D, bm, bn, ctx.causal, **ctx.launch
         )
-        return dq, dk, dv, None, None, None, None
+        return dq, dk, dv, None, None, None, None, None
 
 
 def flash_attention(
@@ -215,10 +235,31 @@ def flash_attention(
     sm_scale: float | None = None,
     block_m: int = 64,
     block_n: int = 64,
+    num_warps: int | None = None,
+    num_stages: int | None = None,
 ) -> torch.Tensor:
-    """softmax(q k^T * scale [+ causal mask]) v, differentiable in q, k and v."""
+    """softmax(q k^T * scale [+ causal mask]) v, differentiable in q, k and v.
+
+    ``num_warps`` / ``num_stages`` are Triton launch parameters (None = Triton's default).
+    """
     scale = 1.0 / math.sqrt(q.shape[-1]) if sm_scale is None else sm_scale
-    return _FlashAttention.apply(q, k, v, causal, scale, block_m, block_n)
+    launch = {}
+    if num_warps is not None:
+        launch["num_warps"] = num_warps
+    if num_stages is not None:
+        launch["num_stages"] = num_stages
+    return _FlashAttention.apply(q, k, v, causal, scale, block_m, block_n, launch)
+
+
+def forward_ptx(q, k, v, causal=False, block_m=64, block_n=64, **launch) -> str:
+    """Compile and run the forward kernel once; return its PTX (to check for ``mma``)."""
+    B, H, N, D = q.shape
+    o = torch.empty_like(q)
+    lse = torch.empty((B * H, N), device=q.device, dtype=torch.float32)
+    kern = _fwd[(triton.cdiv(N, block_m), B * H)](
+        q, k, v, o, lse, LOG2E / math.sqrt(D), N, D, block_m, block_n, causal, **launch
+    )
+    return kern.asm.get("ptx", "")
 
 
 def reference_attention(q, k, v, causal=False, sm_scale=None):

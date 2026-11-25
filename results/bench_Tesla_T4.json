@@ -1,0 +1,859 @@
+{
+ "gpu": "Tesla T4",
+ "attention_causal=False": [
+  {
+   "n": 512,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 10.989650181361608,
+   "tflops": 0.3908192913441634
+  },
+  {
+   "n": 512,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 57.16444778442383,
+   "tflops": 0.26296738827408084
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 15.071065711975098,
+   "tflops": 0.2849809945813802
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 512,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 8.515571212768554,
+   "tflops": 0.504366317735676
+  },
+  {
+   "n": 512,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 28.976608276367188,
+   "tflops": 0.518776572904157
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 512,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 0.6777754072789792,
+   "tflops": 6.336859156992322
+  },
+  {
+   "n": 512,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 2.9344567277214746,
+   "tflops": 5.12271501364828
+  },
+  {
+   "n": 512,
+   "impl": "naive eager",
+   "mode": "fwd",
+   "ms": 2.5286399936676025,
+   "tflops": 1.6985285792978668
+  },
+  {
+   "n": 512,
+   "impl": "naive eager",
+   "mode": "fwd+bwd",
+   "ms": 7.225847999254863,
+   "tflops": 2.0803628221283033
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 32.74140930175781,
+   "tflops": 0.5247137966989605
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 227.03103637695312,
+   "tflops": 0.2648516392453204
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 51.07097625732422,
+   "tflops": 0.3363920262154024
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 13.585589249928793,
+   "tflops": 1.2645656267055216
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 83.18924713134766,
+   "tflops": 0.7228042591738011
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 1024,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 1.1871257830173412,
+   "tflops": 14.471818765770198
+  },
+  {
+   "n": 1024,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 6.090811388833182,
+   "tflops": 9.87217273781302
+  },
+  {
+   "n": 1024,
+   "impl": "naive eager",
+   "mode": "fwd",
+   "ms": 9.805745760599772,
+   "tflops": 1.7520206625211532
+  },
+  {
+   "n": 1024,
+   "impl": "naive eager",
+   "mode": "fwd+bwd",
+   "ms": 27.71627680460612,
+   "tflops": 2.1694667926684574
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 131.8038330078125,
+   "tflops": 0.5213769218071734
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 908.667236328125,
+   "tflops": 0.26469334312957166
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 204.23207092285156,
+   "tflops": 0.33647740252293046
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 55.00688171386719,
+   "tflops": 1.2492887179728256
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 334.8866271972656,
+   "tflops": 0.7182077426887586
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 2048,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 5.238007570567884,
+   "tflops": 13.119392404495839
+  },
+  {
+   "n": 2048,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 23.178135871887207,
+   "tflops": 10.37694186907088
+  },
+  {
+   "n": 2048,
+   "impl": "naive eager",
+   "mode": "fwd",
+   "ms": 39.55993461608887,
+   "tflops": 1.7370978340305967
+  },
+  {
+   "n": 2048,
+   "impl": "naive eager",
+   "mode": "fwd+bwd",
+   "ms": 112.19654083251953,
+   "tflops": 2.1437217831433104
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 528.5130004882812,
+   "tflops": 0.5200967747057244
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 3659.556884765625,
+   "tflops": 0.26289321483401823
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 822.869873046875,
+   "tflops": 0.33404784395155696
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 228.1276092529297,
+   "tflops": 1.2049304678384514
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 1364.6622314453125,
+   "tflops": 0.7049895953265078
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 4096,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 21.71028757095337,
+   "tflops": 12.661182218137206
+  },
+  {
+   "n": 4096,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 93.81068420410156,
+   "tflops": 10.255470178757491
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 2138.281982421875,
+   "tflops": 0.5142032888153807
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 14846.046875,
+   "tflops": 0.25921315819744106
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 3352.031982421875,
+   "tflops": 0.32801346572522627
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 975.822265625,
+   "tflops": 1.1267539863642881
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 5629.171875,
+   "tflops": 0.683633540184985
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 8192,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 89.78227233886719,
+   "tflops": 12.246422363048346
+  },
+  {
+   "n": 8192,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 399.03900146484375,
+   "tflops": 9.64389616826726
+  }
+ ],
+ "attention_causal=True": [
+  {
+   "n": 512,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 17.321593856811525,
+   "tflops": 0.12397725438848838
+  },
+  {
+   "n": 512,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 68.1207046508789,
+   "tflops": 0.11033639194604286
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 32.62723255157471,
+   "tflops": 0.06581874955546466
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 512,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 4.965416479110718,
+   "tflops": 0.4324881220003129
+  },
+  {
+   "n": 512,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 22.376768112182617,
+   "tflops": 0.33589268701890634
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 512,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 512,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 0.4319803878184288,
+   "tflops": 4.971252650716718
+  },
+  {
+   "n": 512,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 2.080885338783264,
+   "tflops": 3.6120167833922414
+  },
+  {
+   "n": 512,
+   "impl": "naive eager",
+   "mode": "fwd",
+   "ms": 3.6268560171127318,
+   "tflops": 0.5921061210777177
+  },
+  {
+   "n": 512,
+   "impl": "naive eager",
+   "mode": "fwd+bwd",
+   "ms": 9.480903095669216,
+   "tflops": 0.7927718163719364
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 64.97433471679688,
+   "tflops": 0.132205041104936
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 256.250732421875,
+   "tflops": 0.11732560054698014
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 113.88700866699219,
+   "tflops": 0.0754250611421109
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 8.057305479049683,
+   "tflops": 1.0661051159516342
+  },
+  {
+   "n": 1024,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 46.912864685058594,
+   "tflops": 0.640864105695413
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 1024,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 1024,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 0.6848546194619146,
+   "tflops": 12.542712493856069
+  },
+  {
+   "n": 1024,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 4.093516778945923,
+   "tflops": 7.344484631559676
+  },
+  {
+   "n": 1024,
+   "impl": "naive eager",
+   "mode": "fwd",
+   "ms": 14.630176067352295,
+   "tflops": 0.5871381555802813
+  },
+  {
+   "n": 1024,
+   "impl": "naive eager",
+   "mode": "fwd+bwd",
+   "ms": 37.80424118041992,
+   "tflops": 0.7952750837800587
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 250.77964782714844,
+   "tflops": 0.1370116700685483
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 993.7780151367188,
+   "tflops": 0.12101201923998631
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 427.13702392578125,
+   "tflops": 0.08044195759993472
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 31.480618158976238,
+   "tflops": 1.0914569146795112
+  },
+  {
+   "n": 2048,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 182.44589233398438,
+   "tflops": 0.6591493113358476
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 2048,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 2048,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 2.9054847796758017,
+   "tflops": 11.825819432388805
+  },
+  {
+   "n": 2048,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 14.189167976379395,
+   "tflops": 8.47541480150171
+  },
+  {
+   "n": 2048,
+   "impl": "naive eager",
+   "mode": "fwd",
+   "ms": 57.061344146728516,
+   "tflops": 0.602154381075335
+  },
+  {
+   "n": 2048,
+   "impl": "naive eager",
+   "mode": "fwd+bwd",
+   "ms": 143.48348999023438,
+   "tflops": 0.8381388290470558
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 986.282470703125,
+   "tflops": 0.139350498011
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 3912.276123046875,
+   "tflops": 0.12295562021255535
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 1643.8040771484375,
+   "tflops": 0.0836103008762577
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 128.49562072753906,
+   "tflops": 1.0696002921642311
+  },
+  {
+   "n": 4096,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 737.5861206054688,
+   "tflops": 0.6521765034802004
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 4096,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 4096,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 11.795492053031921,
+   "tflops": 11.651820276261608
+  },
+  {
+   "n": 4096,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 54.5088005065918,
+   "tflops": 8.824929785307381
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x64",
+   "mode": "fwd",
+   "ms": 3899.506591796875,
+   "tflops": 0.1409808653855038
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x64",
+   "mode": "fwd+bwd",
+   "ms": 15554.2626953125,
+   "tflops": 0.12370533957793248
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x64",
+   "mode": "fwd",
+   "ms": 6458.82080078125,
+   "tflops": 0.08511705632419811
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x64",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x32",
+   "mode": "fwd",
+   "ms": 525.6331176757812,
+   "tflops": 1.0458926490760005
+  },
+  {
+   "n": 8192,
+   "impl": "triton 64x32",
+   "mode": "fwd+bwd",
+   "ms": 2965.432373046875,
+   "tflops": 0.6488582798571833
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x128",
+   "mode": "fwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 8192,
+   "impl": "triton 128x128",
+   "mode": "fwd+bwd",
+   "error": "OutOfResources"
+  },
+  {
+   "n": 8192,
+   "impl": "torch sdpa",
+   "mode": "fwd",
+   "ms": 46.17156791687012,
+   "tflops": 11.906804093762014
+  },
+  {
+   "n": 8192,
+   "impl": "torch sdpa",
+   "mode": "fwd+bwd",
+   "ms": 217.22787475585938,
+   "tflops": 8.857727631734791
+  }
+ ],
+ "rows": [
+  {
+   "cols": 1024,
+   "impl": "softmax triton",
+   "ms": 0.07589649455046948,
+   "gbps": 221.05389846224747
+  },
+  {
+   "cols": 1024,
+   "impl": "softmax torch",
+   "ms": 0.08132680021226406,
+   "gbps": 206.29381650589028
+  },
+  {
+   "cols": 1024,
+   "impl": "rmsnorm triton",
+   "ms": 0.07612760548974261,
+   "gbps": 220.38281503889615
+  },
+  {
+   "cols": 1024,
+   "impl": "rmsnorm eager",
+   "ms": 0.7362326142879633,
+   "gbps": 22.787928263984668
+  },
+  {
+   "cols": 4096,
+   "impl": "softmax triton",
+   "ms": 0.29273317710441704,
+   "gbps": 229.24925921895922
+  },
+  {
+   "cols": 4096,
+   "impl": "softmax torch",
+   "ms": 0.4493395024910569,
+   "gbps": 149.3500207036341
+  },
+  {
+   "cols": 4096,
+   "impl": "rmsnorm triton",
+   "ms": 0.2964912950992584,
+   "gbps": 226.3434546283509
+  },
+  {
+   "cols": 4096,
+   "impl": "rmsnorm eager",
+   "ms": 2.832771986722946,
+   "gbps": 23.690174964499693
+  },
+  {
+   "cols": 8192,
+   "impl": "softmax triton",
+   "ms": 0.5822972655296326,
+   "gbps": 230.49692304139762
+  },
+  {
+   "cols": 8192,
+   "impl": "softmax torch",
+   "ms": 0.813510517279307,
+   "gbps": 164.98585469905893
+  },
+  {
+   "cols": 8192,
+   "impl": "rmsnorm triton",
+   "ms": 0.5848398564154642,
+   "gbps": 229.4948378221561
+  },
+  {
+   "cols": 8192,
+   "impl": "rmsnorm eager",
+   "ms": 5.594203404017857,
+   "gbps": 23.992285997967546
+  },
+  {
+   "cols": 16384,
+   "impl": "softmax triton",
+   "ms": 1.1529250172681587,
+   "gbps": 232.8299342797283
+  },
+  {
+   "cols": 16384,
+   "impl": "softmax torch",
+   "ms": 1.250121455300938,
+   "gbps": 214.72750096540045
+  },
+  {
+   "cols": 16384,
+   "impl": "rmsnorm triton",
+   "ms": 1.1532375757084337,
+   "gbps": 232.76683109731326
+  },
+  {
+   "cols": 16384,
+   "impl": "rmsnorm eager",
+   "ms": 11.138180017471313,
+   "gbps": 24.100477419015764
+  }
+ ]
+}
