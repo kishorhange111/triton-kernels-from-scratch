@@ -27,6 +27,17 @@ def _ms(fn) -> float:
     return triton.testing.do_bench(fn, warmup=25, rep=100)
 
 
+def _ms_interleaved(fns, rounds: int = 5) -> list[float]:
+    """Median over ``rounds`` of timing every candidate in turn. Back-to-back single
+    measurements on a T4 differ by up to ~25% from clock ramp and throttling alone, which
+    is larger than many of the differences being measured."""
+    times = [[] for _ in fns]
+    for _ in range(rounds):
+        for t, fn in zip(times, fns, strict=True):
+            t.append(_ms(fn))
+    return [sorted(t)[len(t) // 2] for t in times]
+
+
 def _attn_flops(b, h, n, d, causal, mode):
     f = 4 * b * h * n * n * d * (0.5 if causal else 1.0)
     return f * (3.5 if mode == "fwd+bwd" else 1.0)
@@ -173,10 +184,14 @@ def bench_paged(h: int = 32, hk: int = 8, d: int = 128, page: int = 16) -> str:
         k, v, bt, sl = make_paged_cache([n] * b, hk, d, page, torch.float16, "cuda", gen, 0)
         q = torch.randn(b, h, d, device="cuda", dtype=torch.float16)
         gb = 2 * b * hk * n * d * 2 / 1e9
-        auto = _ms(lambda: paged_attention(q, k, v, bt, sl))
-        one = _ms(lambda: paged_attention(q, k, v, bt, sl, num_splits=1))
         kc, vc = gather_kv(k, bt, sl), gather_kv(v, bt, sl)
-        sdpa = _ms(lambda: F.scaled_dot_product_attention(q[:, :, None], kc, vc, enable_gqa=True))
+        auto, one, sdpa = _ms_interleaved(
+            [
+                lambda: paged_attention(q, k, v, bt, sl),
+                lambda: paged_attention(q, k, v, bt, sl, num_splits=1),
+                lambda: F.scaled_dot_product_attention(q[:, :, None], kc, vc, enable_gqa=True),
+            ]
+        )
         lines.append(f"| {b} × {n:,} | {gb / auto * 1e3:.0f} | {gb / one * 1e3:.0f} | "
                      f"{gb / sdpa * 1e3:.0f} |")  # fmt: skip
         k = v = kc = vc = None  # free before the next size
