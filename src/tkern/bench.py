@@ -113,9 +113,16 @@ def main(argv=None):
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--heads", type=int, default=16)
     ap.add_argument("--head-dim", type=int, default=64)
+    ap.add_argument("--diagnose", action="store_true", help="only run the launch-parameter sweep")
     a = ap.parse_args(argv)
     os.makedirs(a.out, exist_ok=True)
     gpu = torch.cuda.get_device_name()
+    if a.diagnose:
+        text = diagnose()
+        with open(os.path.join(a.out, f"diagnose_{gpu.replace(' ', '_')}.md"), "w") as f:
+            f.write(text + "\n")
+        print(text)
+        return
     blocks = [(64, 64), (128, 64), (64, 32), (128, 128)]
     report = [f"GPU: **{gpu}**, torch {torch.__version__}, triton {triton.__version__}, fp16, "
               f"B={a.batch} H={a.heads} D={a.head_dim}.\n"]  # fmt: skip
@@ -144,3 +151,37 @@ def main(argv=None):
 
 if __name__ == "__main__":
     main()
+
+
+def diagnose(n: int = 4096, b: int = 4, h: int = 16, d: int = 64) -> str:
+    """Why is attention slow on this GPU? Check for tensor-core MMA in the PTX, then sweep
+    launch parameters for the forward kernel."""
+    from .flash_attn import forward_ptx
+
+    q, k, v = [torch.randn(b, h, n, d, device="cuda", dtype=torch.float16) for _ in range(3)]
+    cap = torch.cuda.get_device_capability()
+    lines = [f"Diagnosis on {torch.cuda.get_device_name()} (sm{cap[0]}{cap[1]}), N={n}, fwd.\n"]
+    ptx = forward_ptx(q, k, v, False, 64, 32)
+    mma = sorted({ln.split()[0] for ln in ptx.splitlines() if "mma" in ln and ln.strip()})
+    fma = sum("fma.rn.f32" in ln for ln in ptx.splitlines())
+    lines.append(f"- tensor-core instructions in PTX: {', '.join(mma) or 'none'}; "
+                 f"scalar fp32 FMAs: {fma}\n")  # fmt: skip
+    lines += ["| tile | num_warps | num_stages | TFLOP/s |", "|---|---|---|---|"]
+    rows = []
+    for bm, bn in ((64, 32), (64, 64), (32, 32), (128, 32), (32, 64)):
+        for w in (2, 4, 8):
+            for st in (1, 2, 3):
+                try:
+                    with torch.no_grad():
+                        ms = _ms(lambda bm=bm, bn=bn, w=w, st=st: flash_attention(
+                            q, k, v, False, None, bm, bn, num_warps=w, num_stages=st))  # fmt: skip
+                    tf = _attn_flops(b, h, n, d, False, "fwd") / ms / 1e9
+                    rows.append((tf, f"| {bm}x{bn} | {w} | {st} | {tf:.2f} |"))
+                except Exception as e:
+                    rows.append((-1, f"| {bm}x{bn} | {w} | {st} | {type(e).__name__} |"))
+    rows.sort(key=lambda r: -r[0])
+    lines += [r[1] for r in rows]
+    with torch.no_grad():
+        ms = _ms(lambda: F.scaled_dot_product_attention(q, k, v))
+    lines.append(f"\ntorch SDPA reference: {_attn_flops(b, h, n, d, False, 'fwd') / ms / 1e9:.2f}")
+    return "\n".join(lines)
