@@ -114,12 +114,19 @@ def main(argv=None):
     ap.add_argument("--heads", type=int, default=16)
     ap.add_argument("--head-dim", type=int, default=64)
     ap.add_argument("--diagnose", action="store_true", help="only run the launch-parameter sweep")
+    ap.add_argument("--paged", action="store_true", help="only benchmark paged-attention decode")
     a = ap.parse_args(argv)
     os.makedirs(a.out, exist_ok=True)
     gpu = torch.cuda.get_device_name()
     if a.diagnose:
         text = diagnose()
         with open(os.path.join(a.out, f"diagnose_{gpu.replace(' ', '_')}.md"), "w") as f:
+            f.write(text + "\n")
+        print(text)
+        return
+    if a.paged:
+        text = bench_paged()
+        with open(os.path.join(a.out, f"paged_{gpu.replace(' ', '_')}.md"), "w") as f:
             f.write(text + "\n")
         print(text)
         return
@@ -147,6 +154,41 @@ def main(argv=None):
     with open(os.path.join(a.out, f"bench_{tag}.json"), "w") as f:
         json.dump(blob, f, indent=1)
     print("\n".join(report))
+
+
+def bench_paged(h: int = 32, hk: int = 8, d: int = 128, page: int = 16) -> str:
+    """Decode attention, one query per sequence: effective GB/s of K+V read."""
+    import torch.nn.functional as F
+
+    from .paged_attn import gather_kv, make_paged_cache, paged_attention
+
+    peak = _hbm_peak_gbps()
+    lines = [f"Paged-attention decode, fp16, H={h} query heads / {hk} KV heads (GQA), D={d}, "
+             f"page={page}. GB/s = bytes of K and V read / time"
+             + (f"; HBM peak ≈ {peak:.0f} GB/s." if peak else "."),
+             "", "| batch × context | paged, split-K (auto) | paged, 1 split | SDPA, contiguous "
+             "cache |", "|---|---|---|---|"]  # fmt: skip
+    gen = torch.Generator().manual_seed(0)
+    for b, n in ((32, 1024), (8, 4096), (8, 16384), (1, 32768)):
+        k, v, bt, sl = make_paged_cache([n] * b, hk, d, page, torch.float16, "cuda", gen, 0)
+        q = torch.randn(b, h, d, device="cuda", dtype=torch.float16)
+        gb = 2 * b * hk * n * d * 2 / 1e9
+        auto = _ms(lambda: paged_attention(q, k, v, bt, sl))
+        one = _ms(lambda: paged_attention(q, k, v, bt, sl, num_splits=1))
+        kc, vc = gather_kv(k, bt, sl), gather_kv(v, bt, sl)
+        sdpa = _ms(lambda: F.scaled_dot_product_attention(q[:, :, None], kc, vc, enable_gqa=True))
+        lines.append(f"| {b} × {n:,} | {gb / auto * 1e3:.0f} | {gb / one * 1e3:.0f} | "
+                     f"{gb / sdpa * 1e3:.0f} |")  # fmt: skip
+        k = v = kc = vc = None  # free before the next size
+        torch.cuda.empty_cache()
+    return "\n".join(lines)
+
+
+def _hbm_peak_gbps() -> float | None:
+    """Theoretical HBM bandwidth from the driver, when torch exposes the memory clock."""
+    p = torch.cuda.get_device_properties(0)
+    clk, bus = getattr(p, "memory_clock_rate", None), getattr(p, "memory_bus_width", None)
+    return 2 * clk * 1e3 * bus / 8 / 1e9 if clk and bus else None
 
 
 def diagnose(n: int = 4096, b: int = 4, h: int = 16, d: int = 64) -> str:

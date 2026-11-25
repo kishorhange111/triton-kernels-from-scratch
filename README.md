@@ -32,10 +32,29 @@ the FlashAttention papers make. dK/dV are accumulated per key block and dQ per q
 separate kernels, so no atomics are needed. With causal masking, blocks entirely above the
 diagonal are skipped, not just masked.
 
+## Paged-attention decode ([`paged_attn.py`](src/tkern/paged_attn.py))
+
+This is the decode kernel inside vLLM-style serving.
+- **Paged KV cache.** The cache is a pool of 16-token pages. Each sequence has a block table
+  listing its pages, so sequences grow without reallocation and freed pages are reused
+  anywhere.
+- **Grouped-query attention.** G query heads read the same KV head.
+- **Flash-decoding split-K.** With a small batch of long sequences, one program per
+  (sequence, head) leaves most SMs idle. Each sequence's pages are therefore split over S
+  programs, each keeping an online-softmax `(m, l, acc)`. A second kernel rescales them to a
+  common max and merges them: `o = Σ 2^(mₛ−M)·accₛ / Σ 2^(mₛ−M)·lₛ`.
+
+One query against a page is a matrix-vector product, so decode attention is bound by memory
+bandwidth: every cached byte is read once. The kernel uses multiply-and-reduce rather than
+`tl.dot`. The tests use page tables in random order, ragged lengths (1 token, page boundary
++ 1, partial and exact pages), more splits than pages, and GQA head sharing. They also check
+that pages no sequence owns are never read. `python -m tkern.bench --paged` reports
+effective GB/s against SDPA on a contiguous cache, with and without split-K.
+
 ## Correctness
 
 ```
-pytest -q        # 14 tests
+pytest -q        # 21 tests
 ```
 
 The tests compare outputs and all gradients with PyTorch. They cover causal and non-causal
@@ -105,6 +124,7 @@ tensor-core path is the documented default. That waits on Colab granting one.
 ```
 src/tkern/flash_attn.py   FlashAttention-2 fwd/bwd + autograd wrapper + reference
 src/tkern/norms.py        softmax, RMSNorm fwd/bwd
+src/tkern/paged_attn.py   paged-attention decode: block tables, GQA, split-K + combine
 src/tkern/bench.py        GPU benchmark → results/bench_<gpu>.md/json
 tests/                    correctness vs PyTorch (CPU interpreter or CUDA)
 ```
